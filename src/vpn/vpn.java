@@ -1,9 +1,9 @@
 package vpn;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.math.BigInteger;
 import java.net.ServerSocket;
@@ -38,7 +38,7 @@ class VPN {
 		System.out.println("Waiting");
 		Socket s = ss.accept();
 		System.out.println("Connected");
-		OutputStream os = s.getOutputStream();
+		ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
 		PrintStream ps = new PrintStream(os);
 		String message = "Sup";
 		BigInteger plaintext = new BigInteger(message.getBytes());
@@ -58,7 +58,7 @@ class VPN {
 		port = input.nextInt();
 
 		Socket s = new Socket("localhost", port);
-		InputStream is = s.getInputStream();
+		ObjectInputStream is = new ObjectInputStream(s.getInputStream());
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		String ciphertext;
 		while((ciphertext = br.readLine())!= null) {
