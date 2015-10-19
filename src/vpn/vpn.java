@@ -8,16 +8,10 @@ import java.io.PrintStream;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.SecureRandom;
 import java.util.Scanner;
 
 class VPN {
 	private static Scanner input = new Scanner(System.in);
-	private BigInteger n;
-	private static BigInteger d;
-	private static BigInteger e;
-	private int bitlen = 1024;
-
 
 	public static void main(String args[]) throws Exception {
 		int mode;
@@ -77,59 +71,4 @@ class VPN {
 		input.close();
 	}
 
-	public void RSA(BigInteger pubKey, BigInteger exponent) {
-		n = pubKey;
-		e = exponent;
-	}
-
-	public void RSA(int bits) {
-		bitlen = bits;
-		SecureRandom r = new SecureRandom();
-		BigInteger p = new BigInteger(bitlen / 2, 100, r);
-		BigInteger q = new BigInteger(bitlen / 2, 100, r);
-		n = p.multiply(q);
-		BigInteger m = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
-		e = new BigInteger("3");
-		while (m.gcd(e).intValue() > 1) {
-			e = e.add(new BigInteger("2"));
-		}
-		d = e.modInverse(m);
-	}
-
-	public String encrypt(String message) {
-		return (new BigInteger(message.getBytes())).modPow(e, n).toString();
-	}
-
-	public BigInteger encrypt(BigInteger message) {
-		return message.modPow(e, n);
-	}
-
-	public String decrypt(String message) {
-		return new String((new BigInteger(message)).modPow(d, n).toByteArray());
-	}
-
-	public BigInteger decrypt(BigInteger message) {
-		return message.modPow(d, n);
-	}
-
-	public void generateKeys() {
-		SecureRandom r = new SecureRandom();
-		BigInteger p = new BigInteger(bitlen / 2, 100, r);
-		BigInteger q = new BigInteger(bitlen / 2, 100, r);
-		n = p.multiply(q);
-		BigInteger m = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
-		e = new BigInteger("3");
-		while (m.gcd(e).intValue() > 1) {
-			e = e.add(new BigInteger("2"));
-		}
-		d = e.modInverse(m);
-	}
-
-	public BigInteger getN() {
-		return n;
-	}
-
-	public BigInteger getE() {
-		return e;
-	}
 } 
