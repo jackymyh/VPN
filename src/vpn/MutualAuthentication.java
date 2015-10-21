@@ -34,10 +34,15 @@ public class MutualAuthentication {
 	}
 	
 //need to fix this method:
-	public static String GetEncryptedMessage(String userIdentity, BigInteger nonce, BigInteger sharedKey){
-		RSA rsa = new RSA(1024);
-		rsa.setPubKey(sharedKey);
-		return rsa.encrypt(userIdentity + nonce.toString()); //still need to encrypt using 'sharedKey' parameter
+	public static String GetEncryptedMessage(String userIdentity, BigInteger nonce, String sharedKey){
+		aes AES = new aes(sharedKey);
+		return aes.encrypt(userIdentity + nonce.toString()); //still need to encrypt using 'sharedKey' parameter
+	}
+	public static String DecryptChallenge(response challenge, String sharedKey){
+		aes AES = new aes(sharedKey);
+		System.out.println(challenge.message);
+		String message = AES.decrypt(challenge.message);
+		return message;
 	}
 	
 	//build response object:
@@ -50,8 +55,8 @@ public class MutualAuthentication {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		BigInteger sharedKey = BigInteger.probablePrime(1024, new SecureRandom()); //temporary
-		
+	//	BigInteger sharedKey = BigInteger.probablePrime(1024, new SecureRandom()); //temporary
+		String sharedKey = "abcdefghij123456";
 		System.out.println("testing Mutual Authentication"); //testing
 		
 		//1) "I'm Alice", R_a
@@ -59,17 +64,22 @@ public class MutualAuthentication {
 		System.out.println("Nonce_A: " + nonce_A); //testing
 		response initiated_message = GetChallenge(nonce_A, GetEncryptedMessage("Alice", nonce_A, sharedKey)); //this chunk to be sent to the other party
 		System.out.println("Initiated_Message: " + initiated_message); //testing
+		//decrypt
+		System.out.println("Decryption: "+ DecryptChallenge(initiated_message, sharedKey));
 		
-		
-		//2) R_b, E("Bob", R_a, B, K_AB)
+		//2) R_b, E("Bob", R_a, B, K_AB)		
 		BigInteger nonce_B = getInitialNonce("Even");
 		System.out.println("Nonce_B: " + nonce_B); //testing
 		response challenge_B = GetChallenge(nonce_A, GetEncryptedMessage("Bob", nonce_B, sharedKey)); //this chunk to be sent to the other party
 		System.out.println("challenge_B: " + challenge_B); //testing
+		//decrypt
+		System.out.println("Decryption: "+ DecryptChallenge(challenge_B, sharedKey));
 		
 		//3) E("Alice, R_B, A, K_AB)
 		response challenge_A = GetChallenge(null, GetEncryptedMessage("Alice", nonce_B, sharedKey));
 		System.out.println("challenge_A: " + challenge_A); //testing
+		//decrypt
+		System.out.println("Decryption: "+ DecryptChallenge(challenge_A, sharedKey));
 	}
 
 }
