@@ -8,9 +8,9 @@ class RSA {
   private BigInteger n, d, e;
   private int bitlen = 1024;
 
-  public RSA(BigInteger pubKey, BigInteger exponent) {
-    n = pubKey;
-    e = exponent;
+  public RSA(BigInteger modulus, BigInteger pubKey) {
+    n = modulus;
+    e = pubKey;
   }
 
   public RSA(int bits) {
@@ -57,12 +57,12 @@ class RSA {
     d = e.modInverse(m);
   }
 
-  public synchronized BigInteger getN() {
-    return n;
+  public synchronized void setMod(BigInteger modulus) {
+    this.n = modulus;
   }
 
-  public synchronized BigInteger getE() {
-    return e;
+  public synchronized void setPubKey(BigInteger pubKey) {
+	this.e = pubKey;
   }
 
   /** test */

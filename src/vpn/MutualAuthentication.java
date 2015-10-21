@@ -36,6 +36,7 @@ public class MutualAuthentication {
 //need to fix this method:
 	public static String GetEncryptedMessage(String userIdentity, BigInteger nonce, BigInteger sharedKey){
 		RSA rsa = new RSA(1024);
+		rsa.setPubKey(sharedKey);
 		return rsa.encrypt(userIdentity + nonce.toString()); //still need to encrypt using 'sharedKey' parameter
 	}
 	
