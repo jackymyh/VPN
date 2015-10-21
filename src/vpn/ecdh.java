@@ -1,7 +1,7 @@
 package vpn;
 
 import java.math.BigInteger;
-import java.util.Random;
+import java.security.SecureRandom;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -49,14 +49,16 @@ public class ecdh {
 	
 	public static BigInteger generatePrivateKey() {
 		BigInteger bi;
+		Boolean withinRange = false;
+		int bitLength = 521; //the length of binary expansion from above PDF
 		
-		//re-generate private key if out of range (1 <= privateKey <= r-1)
 		do {
-			int bitLength = 521; //the length of binary expansion from above PDF
-			Random random = new Random();
-			bi = BigInteger.probablePrime(bitLength, random);
+			SecureRandom sRandom = new SecureRandom();
+			bi = BigInteger.probablePrime(bitLength, sRandom);
+			withinRange = (bi.compareTo(new BigInteger("1")) >= 0 || bi.compareTo(r) <= 0);
+			System.out.println("withinRange: " + withinRange); //testing
 		} 
-		while(!(bi.compareTo(new BigInteger("1")) >= 0 || bi.compareTo(r) <= 0)); 
+		while(!withinRange); //re-generate private key if out of range (1 <= privateKey <= r-1)
 		
 		System.out.println("generated private key is within range"); //testing
 		
