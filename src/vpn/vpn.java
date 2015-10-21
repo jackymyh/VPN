@@ -1,6 +1,7 @@
 package vpn;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -33,16 +34,70 @@ class VPN {
 		}
 	}
 
+//modifications to server based on https://docs.oracle.com/javase/tutorial/networking/sockets/clientServer.html
 	private static void startServer() throws Exception {
 		RSA rsa = new RSA(1024);
-				
-		ServerSocket ss = new ServerSocket(1234);
-		System.out.println("Waiting");
-		Socket s = ss.accept();
-		System.out.println("Connected");
-		ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
-		PrintStream ps = new PrintStream(os);
-		String message = "Sup";
+		int portNumber = 1234;
+		
+		try {
+//		try(	
+			ServerSocket ss = new ServerSocket(portNumber);
+			System.out.println("Waiting"); //comment out if using try-with-resources block
+			Socket s = ss.accept();
+			System.out.println("Connected"); //comment out if using try-with-resources block
+			ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
+			PrintStream ps = new PrintStream(os);
+//		) {	
+			
+			String message = "Sup";
+			
+			//adding FPS Session key with mutual authentication using symmetric key
+			//based on Lecture Slides 7 pg 46
+			String sharedKey = "abcdefghij123456"; //temporary
+			
+			BigInteger nonce = MutualAuthentication.getNonce("odd");
+			BigInteger privateKey = ecdh.generatePrivateKey();
+			
+			String challenge = MutualAuthentication.GetChallenge(nonce, MutualAuthentication.GetEncryptedMessage(message, nonce, ecdh.computePointsToSend(privateKey), sharedKey));
+			ps.println(challenge);
+		} catch(IOException e) {
+			System.out.println("Exception caught when listening on port " + portNumber + ": " + e.getMessage());
+		}
+
+		
+		
+		//need to wait for client's response
+		
+		ps.close();
+		ss.close();
+		s.close();
+		
+		
+//		//1) "I'm Alice", R_a
+//		BigInteger nonce_A = MutualAuthentication.getNonce("Odd");
+//		System.out.println("Nonce_A: " + nonce_A); //testing
+//		String initiated_message = GetChallenge(nonce_A, GetEncryptedMessage("Alice", nonce_A, ecdh.computePointsToSend(ecdh.generatePrivateKey()), sharedKey)); //this chunk to be sent to the other party
+//		System.out.println("Initiated_Message: " + initiated_message); //testing
+//		//decrypt
+//		System.out.println("Decryption: "+ DecryptChallenge(initiated_message, sharedKey));
+//		
+//		//2) R_b, E("Bob", R_a, B, K_AB)		
+//		BigInteger nonce_B = getNonce("Even");
+//		System.out.println("Nonce_B: " + nonce_B); //testing
+//		String challenge_B = GetChallenge(nonce_A, GetEncryptedMessage("Bob", nonce_B, ecdh.computePointsToSend(ecdh.generatePrivateKey()), sharedKey)); //this chunk to be sent to the other party
+//		System.out.println("challenge_B: " + challenge_B); //testing
+//		//decrypt
+//		System.out.println("Decryption: "+ DecryptChallenge(challenge_B, sharedKey));
+//		
+//		//3) E("Alice, R_B, A, K_AB)
+//		String challenge_A = GetChallenge(null, GetEncryptedMessage("Alice", nonce_B, ecdh.computePointsToSend(ecdh.generatePrivateKey()), sharedKey));
+//		System.out.println("challenge_A: " + challenge_A); //testing
+//		//decrypt
+//		System.out.println("Decryption: "+ DecryptChallenge(challenge_A, sharedKey));
+		
+		
+		
+		
 		BigInteger plaintext = new BigInteger(message.getBytes());
 	    BigInteger ciphertext = rsa.encrypt(plaintext);
 		String message2 = new String(ciphertext.toByteArray());				
