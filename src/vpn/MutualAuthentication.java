@@ -5,7 +5,7 @@ import java.security.SecureRandom;
 import java.util.Random;
 
 public class MutualAuthentication {
-	//Based on Mutual Authentication Lecture Slides, slide 46
+	//Based on Stamp Textbook, pg 323 Figure 9.12
 
 	public static BigInteger getInitialNonce(String OddEven){
 		BigInteger bi;
