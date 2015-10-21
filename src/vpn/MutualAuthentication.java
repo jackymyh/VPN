@@ -34,9 +34,11 @@ public class MutualAuthentication {
 	}
 	
 //need to fix this method:
+//	public static String GetEncryptedMessage(String userIdentity, BigInteger nonce, coordinates computedG,String sharedKey){
 	public static String GetEncryptedMessage(String userIdentity, BigInteger nonce, String sharedKey){
 		aes AES = new aes(sharedKey);
-		return aes.encrypt(userIdentity + nonce.toString()); //still need to encrypt using 'sharedKey' parameter
+//		return aes.encrypt(userIdentity + computedG.toString() + nonce.toString());
+		return aes.encrypt(userIdentity + nonce.toString());
 	}
 	public static String DecryptChallenge(response challenge, String sharedKey){
 		aes AES = new aes(sharedKey);

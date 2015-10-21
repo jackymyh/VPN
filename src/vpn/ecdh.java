@@ -116,6 +116,8 @@ public class ecdh {
 		if(testResult_BobComputes.y.compareTo(testResult_AliceComputes.y) == 0){
 			System.out.println("y coordinates equal: " + testResult_BobComputes.y); //testing
 		}
+		
+		System.out.println("Bob's computed coordinates string: " + testResult_BobComputes.toString());
 	}
 	
 }
