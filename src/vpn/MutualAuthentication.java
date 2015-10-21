@@ -7,7 +7,7 @@ import java.util.Random;
 public class MutualAuthentication {
 	//Based on Stamp Textbook, pg 323 Figure 9.12
 
-	public static BigInteger getInitialNonce(String OddEven){
+	public static BigInteger getNonce(String OddEven){
 		BigInteger bi;
 		BigInteger moduloResult = (OddEven.toLowerCase().equals("odd")) ? BigInteger.ONE : BigInteger.ZERO;
 		
@@ -33,27 +33,19 @@ public class MutualAuthentication {
 		return nonce.add(new BigInteger("2")); //ensure nonce remains odd or even
 	}
 	
-//need to fix this method:
-//	public static String GetEncryptedMessage(String userIdentity, BigInteger nonce, coordinates computedG,String sharedKey){
-	public static String GetEncryptedMessage(String userIdentity, BigInteger nonce, String sharedKey){
+	public static String GetEncryptedMessage(String userIdentity, BigInteger nonce, coordinates computedG, String sharedKey){
 		aes AES = new aes(sharedKey);
-//		return aes.encrypt(userIdentity + computedG.toString() + nonce.toString());
-		return aes.encrypt(userIdentity + nonce.toString());
+		return aes.encrypt(userIdentity + computedG.toString() + nonce.toString());
 	}
-	public static String DecryptChallenge(response challenge, String sharedKey){
+	public static String DecryptChallenge(String challenge, String sharedKey){
 		aes AES = new aes(sharedKey);
-		System.out.println(challenge.message);
-		String message = AES.decrypt(challenge.message);
+		System.out.println(challenge);
+		String message = AES.decrypt(challenge);
 		return message;
 	}
 	
-	//build response object:
-	public static response GetChallenge(BigInteger nonce, String message){
-		response result = new response();
-		result.nonce = nonce;
-		result.message = message;
-		
-		return result;
+	public static String GetChallenge(BigInteger nonce, String message){
+		return (nonce + message);
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -62,23 +54,23 @@ public class MutualAuthentication {
 		System.out.println("testing Mutual Authentication"); //testing
 		
 		//1) "I'm Alice", R_a
-		BigInteger nonce_A = getInitialNonce("Odd");
+		BigInteger nonce_A = getNonce("Odd");
 		System.out.println("Nonce_A: " + nonce_A); //testing
-		response initiated_message = GetChallenge(nonce_A, GetEncryptedMessage("Alice", nonce_A, sharedKey)); //this chunk to be sent to the other party
+		String initiated_message = GetChallenge(nonce_A, GetEncryptedMessage("Alice", nonce_A, ecdh.computePointsToSend(ecdh.generatePrivateKey()), sharedKey)); //this chunk to be sent to the other party
 		System.out.println("Initiated_Message: " + initiated_message); //testing
 		//decrypt
 		System.out.println("Decryption: "+ DecryptChallenge(initiated_message, sharedKey));
 		
 		//2) R_b, E("Bob", R_a, B, K_AB)		
-		BigInteger nonce_B = getInitialNonce("Even");
+		BigInteger nonce_B = getNonce("Even");
 		System.out.println("Nonce_B: " + nonce_B); //testing
-		response challenge_B = GetChallenge(nonce_A, GetEncryptedMessage("Bob", nonce_B, sharedKey)); //this chunk to be sent to the other party
+		String challenge_B = GetChallenge(nonce_A, GetEncryptedMessage("Bob", nonce_B, ecdh.computePointsToSend(ecdh.generatePrivateKey()), sharedKey)); //this chunk to be sent to the other party
 		System.out.println("challenge_B: " + challenge_B); //testing
 		//decrypt
 		System.out.println("Decryption: "+ DecryptChallenge(challenge_B, sharedKey));
 		
 		//3) E("Alice, R_B, A, K_AB)
-		response challenge_A = GetChallenge(null, GetEncryptedMessage("Alice", nonce_B, sharedKey));
+		String challenge_A = GetChallenge(null, GetEncryptedMessage("Alice", nonce_B, ecdh.computePointsToSend(ecdh.generatePrivateKey()), sharedKey));
 		System.out.println("challenge_A: " + challenge_A); //testing
 		//decrypt
 		System.out.println("Decryption: "+ DecryptChallenge(challenge_A, sharedKey));
