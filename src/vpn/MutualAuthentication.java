@@ -102,19 +102,19 @@ public class MutualAuthentication {
 	        
 	        // 2) Get Rb from Server, Return Encrypt Rb
 	        String nonce_B = in.readObject().toString();
-	        System.out.println("From Server> Nonce_B: " + nonce_B);
+	        //System.out.println("From Server> Nonce_B: " + nonce_B);
 	        String encryptedNounce_B = AES.encrypt(nonce_B);
 	        out.writeObject(encryptedNounce_B);
-	        System.out.println("To Server> EncryptedNounce_B: " + encryptedNounce_B);
+	        //System.out.println("To Server> EncryptedNounce_B: " + encryptedNounce_B);
 	        
 	        // 3) Send Challenge to Server: Encrypt Ra
 	        BigInteger nonce_A = getNonce("Odd");
-			System.out.println("Nonce_A: " + nonce_A);
+			//System.out.println("Nonce_A: " + nonce_A);
 	        out.writeObject(nonce_A);
 	        
 	        //4) Receive encrypted Ra and verify 
 	  		String encryptedNounce_A = (String) in.readObject();
-	  		System.out.println("From Server> EncryptedNounce_A: " + encryptedNounce_A);
+	  		//System.out.println("From Server> EncryptedNounce_A: " + encryptedNounce_A);
 	  		String answer = AES.decrypt(encryptedNounce_A);
 
 	  		if (!answer.equals(nonce_A.toString())) {
