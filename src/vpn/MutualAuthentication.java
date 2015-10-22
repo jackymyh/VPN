@@ -45,7 +45,7 @@ public class MutualAuthentication {
 	}
 	
 	public static String GetChallenge(BigInteger nonce, String message){
-		return (nonce + message);
+		return (message);
 	}
 	
 	public static void main(String[] args) throws Exception {
