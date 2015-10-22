@@ -1,7 +1,9 @@
 package vpn;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.Random;
 
 public class MutualAuthentication {
@@ -35,7 +37,7 @@ public class MutualAuthentication {
 	
 	public static String GetEncryptedMessage(String userIdentity, BigInteger nonce, coordinates computedG, String sharedKey){
 		aes AES = new aes(sharedKey);
-		return aes.encrypt(userIdentity + computedG.toString() + nonce.toString());
+		return AES.encrypt(userIdentity + computedG.toString() + nonce.toString());
 	}
 	public static String DecryptChallenge(String challenge, String sharedKey){
 		aes AES = new aes(sharedKey);
@@ -48,32 +50,58 @@ public class MutualAuthentication {
 		return (message);
 	}
 	
-	public static void main(String[] args) throws Exception {
-	//	BigInteger sharedKey = BigInteger.probablePrime(1024, new SecureRandom()); //temporary
-		String sharedKey = "abcdefghij123456";
-		System.out.println("testing Mutual Authentication"); //testing
-		
-		//1) "I'm Alice", R_a
-		BigInteger nonce_A = getNonce("Odd");
-		System.out.println("Nonce_A: " + nonce_A); //testing
-		String initiated_message = GetChallenge(nonce_A, GetEncryptedMessage("Alice", nonce_A, ecdh.computePointsToSend(ecdh.generatePrivateKey()), sharedKey)); //this chunk to be sent to the other party
-		System.out.println("Initiated_Message: " + initiated_message); //testing
-		//decrypt
-		System.out.println("Decryption: "+ DecryptChallenge(initiated_message, sharedKey));
-		
-		//2) R_b, E("Bob", R_a, B, K_AB)		
-		BigInteger nonce_B = getNonce("Even");
-		System.out.println("Nonce_B: " + nonce_B); //testing
-		String challenge_B = GetChallenge(nonce_A, GetEncryptedMessage("Bob", nonce_B, ecdh.computePointsToSend(ecdh.generatePrivateKey()), sharedKey)); //this chunk to be sent to the other party
-		System.out.println("challenge_B: " + challenge_B); //testing
-		//decrypt
-		System.out.println("Decryption: "+ DecryptChallenge(challenge_B, sharedKey));
-		
-		//3) E("Alice, R_B, A, K_AB)
-		String challenge_A = GetChallenge(null, GetEncryptedMessage("Alice", nonce_B, ecdh.computePointsToSend(ecdh.generatePrivateKey()), sharedKey));
-		System.out.println("challenge_A: " + challenge_A); //testing
-		//decrypt
-		System.out.println("Decryption: "+ DecryptChallenge(challenge_A, sharedKey));
+	public static boolean muAuth(int type, ObjectOutputStream out, ObjectInputStream in) throws ClassNotFoundException, IOException{
+		if (type == TwoWayVPN.SERVER){
+	        aes AES = new aes("abcdefghij123456");
+			String clientSentence;
+			boolean auth = false;
+
+			System.out.println("Start Mutual Authentication.");
+			
+	        //1) get I'm Alice from Client
+	        clientSentence = (String) in.readObject();
+	        System.out.println("From Client> " + clientSentence);
+	       
+	        //2) Send Challenge to Client: Encrypt Rb
+	  		BigInteger nonce_B = getNonce("Even");
+	  		System.out.println("Nonce_B: " + nonce_B); //testing
+	  		out.writeObject(nonce_B);
+	  		
+	  		//3) Get Ra from Client, Return Encrypt Ra
+	        String nonce_A = (String) in.readObject();
+	        System.out.println("From Client> nonce_A " + nonce_A);
+	        String encryptedNounce_A = AES.encrypt(nonce_A);
+	        out.writeObject(encryptedNounce_A);
+	        System.out.println("To Client> encryptedNounce_a " + encryptedNounce_A);
+	        
+	        auth = true;
+	        return auth;
+	        
+		}
+		else {
+			aes AES = new aes("abcdefghij123456");
+			boolean auth = false;
+			
+			System.out.println("Start Mutual Authentication.");
+		       
+	        // 1) I'm Alice
+	        out.writeObject("I'm Alice");
+	        
+	        // 2) Get Rb from Server, Return Encrypt Rb
+	        String nonce_B = in.readObject().toString();
+	        System.out.println("From Server> nonce_b " + nonce_B);
+	        String encryptedNounce_B = AES.encrypt(nonce_B);
+	        out.writeObject(encryptedNounce_B);
+	        System.out.println("To Server> encryptedNounce_b " + encryptedNounce_B);
+	        
+	        // 3) Send Challenge to Server: Encrypt Ra
+	        BigInteger nonce_A = getNonce("Odd");
+			System.out.println("Nonce_A: " + nonce_A);
+	        out.writeObject(nonce_A);
+	        
+	        auth = true;
+	        return auth;
+		}
 	}
 
 }

@@ -1,6 +1,5 @@
 package vpn;
 
-import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -25,7 +24,7 @@ public class aes {
 		this.encryptKey = key;
 		
 	}
-	public static String encrypt(String text){
+	public String encrypt(String text){
 		
 		try {
 		byte[] key = encryptKey.getBytes();

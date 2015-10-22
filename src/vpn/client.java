@@ -1,29 +1,27 @@
 package vpn;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Scanner;
 
 class Client {
-	public static void main(String args[]) throws Exception {
-		int port;
-		 
-	    Scanner in = new Scanner(System.in);
-	 
-	    System.out.println("Enter a port");
-	    port = in.nextInt();
+	public static void startClient(String sharedKey) throws Exception {
+		Scanner input = new Scanner(System.in);
+
+        String host;
+        System.out.println("Server IP:");
+		host = input.next();
 		
-		Socket s = new Socket("localhost", port);
-		InputStream is = s.getInputStream();
-		BufferedReader br = new BufferedReader(new InputStreamReader(is));
-		String message;
-		while((message = br.readLine())!= null) {
-			System.out.println(message);
-		}
-		br.close();
-		s.close();
-		in.close();
+        Socket clientSocket = new Socket(host, 6789);
+        
+        ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
+        ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
+        
+        if (MutualAuthentication.muAuth(TwoWayVPN.CLIENT, out, in)) {
+        	//continue with message
+        }
+
+        //clientSocket.close();
 	}
 } 
