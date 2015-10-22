@@ -66,13 +66,13 @@ public class MutualAuthentication {
 	       
 	        //2) Send Challenge to Client: Encrypt Rb
 	  		BigInteger nonce_B = getNonce("Even");
-	  		System.out.println("Nonce_B: " + nonce_B); //testing
+//	  		System.out.println("Nonce_B: " + nonce_B); //testing
 	  		out.writeObject(nonce_B);
 	  		
 	  		//3) Receive encrypted Rb and verify 
-	  		String encryptedNounce_B = (String) in.readObject();
-	  		System.out.println("From Client> EncryptedNounce_B: " + encryptedNounce_B);
-	  		String answer = AES.decrypt(encryptedNounce_B);
+	  		String encryptedNonce_B = (String) in.readObject();
+//	  		System.out.println("From Client> EncryptedNonce_B: " + encryptedNonce_B);
+	  		String answer = AES.decrypt(encryptedNonce_B);
 
 	  		if (!answer.equals(nonce_B.toString())) {
 	  			System.out.println("Client failed authentication");
@@ -81,10 +81,10 @@ public class MutualAuthentication {
 	  		
 	  		//4) Get Ra from Client, Return Encrypt Ra
 	        String nonce_A = in.readObject().toString();
-	        System.out.println("From Client> Nonce_A: " + nonce_A);
-	        String encryptedNounce_A = AES.encrypt(nonce_A);
-	        out.writeObject(encryptedNounce_A);
-	        System.out.println("To Client> EncryptedNounce_A: " + encryptedNounce_A);
+//	        System.out.println("From Client> Nonce_A: " + nonce_A);
+	        String encryptedNonce_A = AES.encrypt(nonce_A);
+	        out.writeObject(encryptedNonce_A);
+//	        System.out.println("To Client> EncryptedNonce_A: " + encryptedNonce_A);
 	        
 	        auth = true;
 	        System.out.println("Authentication Success");
