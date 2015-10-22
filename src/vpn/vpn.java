@@ -1,14 +1,10 @@
 package vpn;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintStream;
 import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.KeyPair;
 import java.util.Scanner;
 
 
@@ -41,13 +37,14 @@ class VPN {
 		Socket s = ss.accept();
 		System.out.println("Connected");
 		ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
-		PrintStream ps = new PrintStream(os);
+		
 		String message = "Sup";
 		BigInteger plaintext = new BigInteger(message.getBytes());
 	    BigInteger ciphertext = rsa.encrypt(plaintext);
 		String message2 = new String(ciphertext.toByteArray());				
-		ps.println(message2);
-		ps.close();
+		os.writeObject(message2);
+		
+		os.close();
 		ss.close();
 		s.close();
 	}
@@ -61,15 +58,14 @@ class VPN {
 		
 		Socket s = new Socket("localhost", port);
 		ObjectInputStream is = new ObjectInputStream(s.getInputStream());
-		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		
 		String ciphertext;
-		while((ciphertext = br.readLine())!= null) {
-			BigInteger plaintext = rsa.decrypt(new BigInteger(ciphertext.getBytes()));
-		    String message = new String(plaintext.toByteArray());
-			System.out.println(message);
-		}
-				
-		br.close();
+		ciphertext = (String) is.readObject();
+		BigInteger plaintext = rsa.decrypt(new BigInteger(ciphertext.getBytes()));
+		String message = new String (plaintext.toByteArray());
+		System.out.println(message);
+
+		is.close();
 		s.close();
 		input.close();
 	}

@@ -64,6 +64,14 @@ class RSA {
   public synchronized void setPubKey(BigInteger pubKey) {
 	this.e = pubKey;
   }
+  
+  public synchronized BigInteger getMod() {
+	  return this.n;
+  }
+
+  public synchronized BigInteger getPubKey() {
+	  return this.e;
+  }
 
   /** test */
   public static void main(String[] args) {
