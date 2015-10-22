@@ -10,7 +10,7 @@ class Client {
 		Scanner input = new Scanner(System.in);
 
         String host;
-        System.out.println("Server IP:");
+        System.out.println("Server IP to connect to:");
 		host = input.next();
 		
         Socket clientSocket = new Socket(host, 6789);
@@ -25,7 +25,9 @@ class Client {
         		String send = input.next();
         		
         		if (send.equals("exit")) {
-        			System.out.println("Client exit");
+            		String encryptSend = AES.encrypt(send);
+            		out.writeObject(encryptSend);
+        			System.out.println("Client closing");
         			break;
         		}
         	
@@ -34,6 +36,7 @@ class Client {
         		System.out.println("To Server>" + send);
         	}
         }
+        input.close();
         in.close();
         out.close();
         clientSocket.close();
