@@ -6,6 +6,8 @@ import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.util.Random;
 
+import org.apache.commons.codec.binary.Base64;
+
 public class MutualAuthentication {
 	//Based on Stamp Textbook, pg 323 Figure 9.12
 
@@ -13,7 +15,7 @@ public class MutualAuthentication {
 		BigInteger bi;
 		BigInteger moduloResult = (OddEven.toLowerCase().equals("odd")) ? BigInteger.ONE : BigInteger.ZERO;
 		
-		System.out.println("moduloResult: " + moduloResult); //testing
+		//System.out.println("moduloResult: " + moduloResult); //testing
 		
 		Boolean isCorrectNonce = false;
 		
@@ -26,7 +28,7 @@ public class MutualAuthentication {
 			bi = bi.add(new BigInteger("1"));
 		}
 		
-		System.out.println("bi: " + bi); //testing
+		//System.out.println("bi: " + bi); //testing
 		
 		return bi;
 	}
@@ -50,9 +52,9 @@ public class MutualAuthentication {
 		return (message);
 	}
 	
-	public static boolean muAuth(int type, ObjectOutputStream out, ObjectInputStream in) throws ClassNotFoundException, IOException{
+	public static boolean muAuth(int type, ObjectOutputStream out, ObjectInputStream in, aes AES) throws ClassNotFoundException, IOException{
 		if (type == TwoWayVPN.SERVER){
-	        aes AES = new aes("abcdefghij123456");
+	        
 			String clientSentence;
 			boolean auth = false;
 
@@ -67,19 +69,30 @@ public class MutualAuthentication {
 	  		System.out.println("Nonce_B: " + nonce_B); //testing
 	  		out.writeObject(nonce_B);
 	  		
-	  		//3) Get Ra from Client, Return Encrypt Ra
-	        String nonce_A = (String) in.readObject();
-	        System.out.println("From Client> nonce_A " + nonce_A);
+	  		//3) Receive encrypted Rb and verify 
+	  		String encryptedNounce_B = (String) in.readObject();
+	  		System.out.println("From Client> EncryptedNounce_B: " + encryptedNounce_B);
+	  		String answer = AES.decrypt(encryptedNounce_B);
+
+	  		if (!answer.equals(nonce_B.toString())) {
+	  			System.out.println("Client failed authentication");
+	  			return auth;
+	  		}
+	  		
+	  		//4) Get Ra from Client, Return Encrypt Ra
+	        String nonce_A = in.readObject().toString();
+	        System.out.println("From Client> Nonce_A: " + nonce_A);
 	        String encryptedNounce_A = AES.encrypt(nonce_A);
 	        out.writeObject(encryptedNounce_A);
-	        System.out.println("To Client> encryptedNounce_a " + encryptedNounce_A);
+	        System.out.println("To Client> EncryptedNounce_A: " + encryptedNounce_A);
 	        
 	        auth = true;
+	        System.out.println("Authentication Success");
 	        return auth;
 	        
 		}
 		else {
-			aes AES = new aes("abcdefghij123456");
+
 			boolean auth = false;
 			
 			System.out.println("Start Mutual Authentication.");
@@ -89,17 +102,28 @@ public class MutualAuthentication {
 	        
 	        // 2) Get Rb from Server, Return Encrypt Rb
 	        String nonce_B = in.readObject().toString();
-	        System.out.println("From Server> nonce_b " + nonce_B);
+	        System.out.println("From Server> Nonce_B: " + nonce_B);
 	        String encryptedNounce_B = AES.encrypt(nonce_B);
 	        out.writeObject(encryptedNounce_B);
-	        System.out.println("To Server> encryptedNounce_b " + encryptedNounce_B);
+	        System.out.println("To Server> EncryptedNounce_A: " + encryptedNounce_B);
 	        
 	        // 3) Send Challenge to Server: Encrypt Ra
 	        BigInteger nonce_A = getNonce("Odd");
 			System.out.println("Nonce_A: " + nonce_A);
 	        out.writeObject(nonce_A);
 	        
+	        //4) Receive encrypted Ra and verify 
+	  		String encryptedNounce_A = (String) in.readObject();
+	  		System.out.println("From Server> EncryptedNounce_A: " + encryptedNounce_A);
+	  		String answer = AES.decrypt(encryptedNounce_A);
+
+	  		if (!answer.equals(nonce_A.toString())) {
+	  			System.out.println("Server failed authentication");
+	  			return auth;
+	  		}
+	        
 	        auth = true;
+	        System.out.println("Authentication Success");
 	        return auth;
 		}
 	}

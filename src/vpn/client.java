@@ -14,12 +14,18 @@ class Client {
 		host = input.next();
 		
         Socket clientSocket = new Socket(host, 6789);
+        aes AES = new aes(sharedKey);
         
         ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
         ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
         
-        if (MutualAuthentication.muAuth(TwoWayVPN.CLIENT, out, in)) {
-        	//continue with message
+        if (MutualAuthentication.muAuth(TwoWayVPN.CLIENT, out, in, AES)) {
+
+        	System.out.println("Data to send:");
+        	String send = input.next();
+        	String encryptSend = AES.encrypt(send);
+        	out.writeObject(encryptSend);
+        	System.out.println("To Server>" + send);
         }
 
         //clientSocket.close();

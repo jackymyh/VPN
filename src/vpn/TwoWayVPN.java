@@ -1,20 +1,6 @@
 package vpn;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintStream;
-import java.math.BigInteger;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.security.KeyPair;
 import java.util.Scanner;
-
-import org.apache.commons.codec.binary.Base64;
-
-import java.io.*;
-import java.net.*;
 
 
 public class TwoWayVPN {
@@ -29,9 +15,12 @@ public class TwoWayVPN {
 		System.out.println("Choose mode: 1 for Server, 2 for Client");
 		mode = input.nextInt();
 		
-		System.out.print("Enter shared secret value:");
+		System.out.print("Enter 16 byte shared secret value:");
 		sharedKey = input.next();
-		
+		if (sharedKey.length() < 16) {
+			System.out.println("Your key " + sharedKey + " is not 16 byte so we replaced for you :)");
+			sharedKey = "anckformv0m2kdks";
+		}
 		chooseMode(mode, sharedKey);
 		
 		while(true){

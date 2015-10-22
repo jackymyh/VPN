@@ -11,12 +11,17 @@ class Server {
         ServerSocket welcomeSocket = new ServerSocket(6789);
 
         Socket connectionSocket = welcomeSocket.accept();
+        aes AES = new aes(sharedKey);
       
         ObjectOutputStream out = new ObjectOutputStream(connectionSocket.getOutputStream());
         ObjectInputStream in = new ObjectInputStream(connectionSocket.getInputStream());
         
-        if (MutualAuthentication.muAuth(TwoWayVPN.SERVER, out, in)) {
-        	//continue with message
+        if (MutualAuthentication.muAuth(TwoWayVPN.SERVER, out, in, AES)) {
+        	while(true){
+        		String encryptedIn = (String) in.readObject();
+        		String decryptedIn = AES.decrypt(encryptedIn);
+        		System.out.println("From Client>" + decryptedIn);
+        	}
         }
 	}
 	
