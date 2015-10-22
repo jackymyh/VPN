@@ -14,6 +14,10 @@ public class TwoWayVPN {
 		
 		System.out.println("Choose mode: 1 for Server, 2 for Client");
 		mode = input.nextInt();
+		while (mode != SERVER && mode != CLIENT) {
+			System.out.println("Choose mode: 1 for Server, 2 for Client");
+			mode = input.nextInt();
+		}
 		
 		System.out.println("Enter 16 byte shared secret value:");
 		sharedKey = input.next();
