@@ -105,7 +105,7 @@ public class MutualAuthentication {
 	        System.out.println("From Server> Nonce_B: " + nonce_B);
 	        String encryptedNounce_B = AES.encrypt(nonce_B);
 	        out.writeObject(encryptedNounce_B);
-	        System.out.println("To Server> EncryptedNounce_A: " + encryptedNounce_B);
+	        System.out.println("To Server> EncryptedNounce_B: " + encryptedNounce_B);
 	        
 	        // 3) Send Challenge to Server: Encrypt Ra
 	        BigInteger nonce_A = getNonce("Odd");

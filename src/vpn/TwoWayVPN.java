@@ -15,25 +15,23 @@ public class TwoWayVPN {
 		System.out.println("Choose mode: 1 for Server, 2 for Client");
 		mode = input.nextInt();
 		
-		System.out.print("Enter 16 byte shared secret value:");
+		System.out.println("Enter 16 byte shared secret value:");
 		sharedKey = input.next();
-		if (sharedKey.length() < 16) {
-			System.out.println("Your key " + sharedKey + " is not 16 byte so we replaced for you :)");
-			sharedKey = "anckformv0m2kdks";
+		while (sharedKey.length() < 16) {
+			System.out.println("Your key is not 16 byte. Try again: ");
+			sharedKey = input.next();
 		}
 		chooseMode(mode, sharedKey);
 		
-		while(true){
-		       
-	        
-        }
 	}
 
 	private static void chooseMode(int mode, String sharedKey) throws Exception {
 		if (mode == SERVER) {
+			System.out.println("Starting server...");
 			Server.startServer(sharedKey);
 		}
 		else {
+			System.out.println("Starting client...");
 			Client.startClient(sharedKey);
 		}
 	}
