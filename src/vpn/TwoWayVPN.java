@@ -67,7 +67,7 @@ public class TwoWayVPN {
   		//String challenge_B = GetChallenge(nonce_A, mutualAuth.GetEncryptedMessage("Bob", nonce_B, ecdh.computePointsToSend(ecdh.generatePrivateKey()), sharedKey)); //this chunk to be sent to the other party
   		//System.out.println("challenge_B: " + challenge_B); //testing
   		
-  		//3) Return Encrypt Ra
+  		//3) Get Ra from Client, Return Encrypt Ra
         String nonce_A = (String) in.readObject();
         System.out.println("From Client> nonce_A " + nonce_A);
         String encryptedNounce_A = AES.encrypt(nonce_A);
@@ -100,7 +100,7 @@ public class TwoWayVPN {
         MutualAuthentication mutualAuth = new MutualAuthentication();
         aes AES = new aes(sharedKey);
         
-        Socket clientSocket = new Socket("localhost", 6789);
+        Socket clientSocket = new Socket("128.189.240.96", 6789);
         
         DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
         BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -112,17 +112,20 @@ public class TwoWayVPN {
         // 1) I'm Alice
         out.writeObject("I'm Alice");
         
-        // 2) Return Encrypt Rb
+        // 2) Get Rb from Server, Return Encrypt Rb
         String nonce_B = in.readObject().toString();
         System.out.println("From Server> nonce_b " + nonce_B);
         String encryptedNounce_B = AES.encrypt(nonce_B);
         out.writeObject(encryptedNounce_B);
-        System.out.println("To Client> encryptedNounce_b " + encryptedNounce_B);
+        System.out.println("To Server> encryptedNounce_b " + encryptedNounce_B);
         
-        // 3) Challenge: Encrypt Ra
+        // 3) Send Challenge to Server: Encrypt Ra
         BigInteger nonce_A = mutualAuth.getNonce("Odd");
 		System.out.println("Nonce_A: " + nonce_A);
-        out.writeObject(new String(nonce_A.toByteArray()));
+        out.writeObject(nonce_A);
+        
+        
+        
         
 		
 		//String nonce_B = inFromServer.readLine();
