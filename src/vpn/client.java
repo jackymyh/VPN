@@ -20,12 +20,13 @@ class Client {
         ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
         
         if (MutualAuthentication.muAuth(TwoWayVPN.CLIENT, out, in, AES)) {
-
+        	while(true){
         	System.out.println("Data to send:");
         	String send = input.next();
         	String encryptSend = AES.encrypt(send);
         	out.writeObject(encryptSend);
         	System.out.println("To Server>" + send);
+        	}
         }
 
         //clientSocket.close();
