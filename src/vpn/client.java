@@ -21,17 +21,21 @@ class Client {
         
         if (MutualAuthentication.muAuth(TwoWayVPN.CLIENT, out, in, AES)) {
         	while(true){
-        	System.out.println("Data to send: (enter exit to quit)");
-      
-        	String send = input.next();
-        	if (send.equals("exit"))
-        		break;
-        	String encryptSend = AES.encrypt(send);
-        	out.writeObject(encryptSend);
-        	System.out.println("To Server>" + send);
+        		System.out.println("Data to send: (enter exit to quit)");
+        		String send = input.next();
+        		
+        		if (send.equals("exit")) {
+        			System.out.println("Client exit");
+        			break;
+        		}
+        	
+        		String encryptSend = AES.encrypt(send);
+        		out.writeObject(encryptSend);
+        		System.out.println("To Server>" + send);
         	}
         }
-
-        //clientSocket.close();
+        in.close();
+        out.close();
+        clientSocket.close();
 	}
 } 
